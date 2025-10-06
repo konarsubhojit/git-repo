@@ -1,98 +1,151 @@
 # Quick Start Guide
 
-This guide will help you get the Cloud Sync Application up and running in minutes.
+This guide will help you quickly set up and run the Cloud Sync Application, which consists of a Node.js backend and an Android frontend.
 
-## Step 1: Install Dependencies
+## Prerequisites
 
+### Backend
+- Node.js (v14 or higher)
+- npm or yarn
+
+### Frontend
+- Android Studio Arctic Fox or later
+- Android SDK 24+ (Android 7.0+)
+- An Android device or emulator
+
+## Backend Setup (5 minutes)
+
+1. **Navigate to backend folder**
+```bash
+cd backend
+```
+
+2. **Install dependencies**
 ```bash
 npm install
 ```
 
-## Step 2: Set Up Environment Variables
-
-Copy the example environment file:
-
+3. **Configure environment**
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your credentials (see below for how to get them).
+4. **Get OAuth credentials**
 
-## Step 3: Get OAuth Credentials
+For Google Drive:
+- Visit [Google Cloud Console](https://console.cloud.google.com/)
+- Create a project and enable Google Drive API
+- Create OAuth 2.0 credentials
+- Add redirect URI: `http://localhost:3000/auth/google/callback`
+- Copy Client ID and Secret to `.env`
 
-### For Google Drive:
+For OneDrive:
+- Visit [Azure Portal](https://portal.azure.com/)
+- Register an app in Azure Active Directory
+- Add redirect URI: `http://localhost:3000/auth/microsoft/callback`
+- Grant permissions: `User.Read`, `Files.ReadWrite`
+- Copy Application ID and Secret to `.env`
 
-1. Visit [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project
-3. Enable "Google Drive API"
-4. Go to Credentials → Create OAuth 2.0 Client ID
-5. Add redirect URI: `http://localhost:3000/auth/google/callback`
-6. Copy Client ID and Secret to `.env`
-
-### For Microsoft OneDrive:
-
-1. Visit [Azure Portal](https://portal.azure.com/)
-2. Go to Azure Active Directory → App registrations
-3. Create new registration
-4. Add redirect URI: `http://localhost:3000/auth/microsoft/callback`
-5. Create client secret under "Certificates & secrets"
-6. Add API permissions: User.Read, Files.ReadWrite
-7. Copy Application ID and Secret to `.env`
-
-## Step 4: Start the Server
-
+5. **Start the server**
 ```bash
 npm start
 ```
 
-The server will start on `http://localhost:3000`
+The backend will be available at `http://localhost:3000`
 
-## Step 5: Test the API
+## Frontend Setup (10 minutes)
 
-### Test with Browser:
+1. **Open in Android Studio**
+   - Launch Android Studio
+   - Open existing project
+   - Navigate to `frontend/CloudSyncApp`
 
-1. Open browser and go to `http://localhost:3000`
-2. You should see the API information page
-3. Visit `http://localhost:3000/auth/google` to test Google login
-4. Visit `http://localhost:3000/auth/microsoft` to test Microsoft login
+2. **Configure backend URL**
+   
+   Edit `app/src/main/res/values/strings.xml`:
+   ```xml
+   <string name="backend_url">http://10.0.2.2:3000</string>
+   ```
+   
+   Note: `10.0.2.2` is the special IP for emulator to access host localhost. For a physical device, use your computer's IP address.
 
-### Test with cURL:
+3. **Configure OneDrive authentication**
+   
+   a. Get your app's signature hash:
+   ```bash
+   keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore | openssl sha1 -binary | openssl base64
+   ```
+   Default password: `android`
+   
+   b. Update `app/src/main/res/raw/auth_config_msal.json`:
+   - Replace `YOUR_MICROSOFT_CLIENT_ID` with your Azure app's Client ID
+   - Replace `YOUR_SIGNATURE_HASH` with the hash from step 3a
+   
+   c. Update `app/src/main/AndroidManifest.xml`:
+   - Replace `YOUR_SIGNATURE_HASH` in BrowserTabActivity
+   
+   d. In Azure Portal, add Android platform redirect URI:
+   - Format: `msauth://com.cloudsync.app/YOUR_SIGNATURE_HASH`
 
-```bash
-# Check server status
-curl http://localhost:3000/
+4. **Build and run**
+   - Click the "Run" button (green triangle)
+   - Select your device or emulator
+   - Wait for app to build and install
 
-# Check auth status
-curl http://localhost:3000/auth/status
-```
+## Using the App
 
-## Step 6: Integrate with Your Mobile App
+### Select Google Account
+1. Tap "Select Google Account"
+2. Choose from available accounts on your device
+3. The selected account will be displayed
 
-Use the API endpoints documented in `API_DOCUMENTATION.md` to integrate with your mobile app.
+### Add OneDrive Account
+1. Tap "Add OneDrive Account"
+2. Tap "Sign In"
+3. Complete Microsoft authentication
+4. Grant requested permissions
 
-Example workflow:
-1. User authenticates via OAuth (opens web view)
-2. Mobile app uploads data via `/api/sync/upload`
-3. Data is stored in Google Drive or OneDrive
-4. Mobile app can download data via `/api/sync/download`
+### Sync Data
+1. Once an account is connected, the "Sync Data" button becomes active
+2. Tap it to sync your data to cloud storage
 
 ## Troubleshooting
 
-### "Client ID not configured"
-- Make sure you've set up `.env` with your OAuth credentials
+### Backend won't start
+- Make sure OAuth credentials are correctly configured in `.env`
+- Check that port 3000 is not already in use
 
-### "Redirect URI mismatch"
-- Ensure redirect URIs match exactly in your OAuth app settings
+### Can't connect to backend from app
+- For emulator: Use `http://10.0.2.2:3000`
+- For physical device: Use your computer's IP (e.g., `http://192.168.1.100:3000`)
+- Make sure backend is running
+- Check firewall settings
 
-### "Permission denied"
-- Check that you've enabled the required APIs and permissions
+### Google account selection not working
+- Grant GET_ACCOUNTS permission when prompted
+- Make sure you have at least one Google account on your device
+
+### OneDrive authentication fails
+- Verify MSAL configuration is correct
+- Check signature hash matches in all locations
+- Ensure redirect URI is added in Azure Portal
+- Verify API permissions are granted
 
 ## Next Steps
 
-- Read the full [README.md](README.md) for detailed information
-- Check [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for complete API reference
-- See [CONTRIBUTING.md](CONTRIBUTING.md) if you want to contribute
+- See [backend/README.md](backend/README.md) for detailed backend documentation
+- See [frontend/README.md](frontend/README.md) for detailed Android app documentation
+- See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for API reference
+
+## Production Deployment
+
+For production deployment:
+- Use HTTPS for the backend
+- Use proper OAuth credentials (not development ones)
+- Enable ProGuard for the Android app
+- Use a signed release APK
+- Store secrets securely
 
 ## Support
 
-If you encounter issues, please open an issue on GitHub.
+For issues or questions, please open an issue on GitHub.

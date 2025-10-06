@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cloud Sync</string>
+    <string name="select_account">Select Account</string>
+    <string name="onedrive_auth">OneDrive Authentication</string>
+    
+    <!-- Main Activity -->
+    <string name="welcome_message">Welcome to Cloud Sync</string>
+    <string name="select_google_account">Select Google Account</string>
+    <string name="add_onedrive_account">Add OneDrive Account</string>
+    <string name="manage_accounts">Manage Accounts</string>
+    <string name="sync_data">Sync Data</string>
+    
+    <!-- Account Selection -->
+    <string name="choose_google_account">Choose a Google Account</string>
+    <string name="no_accounts_found">No Google accounts found on this device</string>
+    <string name="add_account">Add Account</string>
+    <string name="account_selected">Account selected: %1$s</string>
+    
+    <!-- OneDrive -->
+    <string name="onedrive_sign_in">Sign in to OneDrive</string>
+    <string name="onedrive_sign_out">Sign out</string>
+    <string name="onedrive_connected">Connected to OneDrive</string>
+    <string name="onedrive_not_connected">Not connected to OneDrive</string>
+    <string name="sign_in_button">Sign In</string>
+    <string name="sign_out_button">Sign Out</string>
+    
+    <!-- Sync -->
+    <string name="upload_file">Upload File</string>
+    <string name="download_file">Download File</string>
+    <string name="list_files">List Files</string>
+    <string name="syncing">Syncing…</string>
+    <string name="sync_complete">Sync complete</string>
+    <string name="sync_failed">Sync failed: %1$s</string>
+    
+    <!-- Errors -->
+    <string name="error_no_account">Please select an account first</string>
+    <string name="error_auth_failed">Authentication failed</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    
+    <!-- Backend API Configuration -->
+    <string name="backend_url">http://10.0.2.2:3000</string>
+    <string name="backend_api_url">http://10.0.2.2:3000/api</string>
+</resources>

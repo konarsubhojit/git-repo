@@ -134,6 +134,114 @@ class GoogleDriveService {
       throw new Error(`Failed to search files: ${error.message}`);
     }
   }
+
+  /**
+   * Create or get folder by path
+   */
+  async getOrCreateFolder(folderPath) {
+    try {
+      const folderName = folderPath.replace(/^\/+|\/+$/g, ''); // Remove leading/trailing slashes
+      
+      // Search for existing folder
+      const query = `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+      const response = await this.drive.files.list({
+        q: query,
+        fields: 'files(id, name)',
+        pageSize: 1
+      });
+
+      if (response.data.files && response.data.files.length > 0) {
+        return {
+          success: true,
+          folder: response.data.files[0]
+        };
+      }
+
+      // Create folder if it doesn't exist
+      const fileMetadata = {
+        name: folderName,
+        mimeType: 'application/vnd.google-apps.folder'
+      };
+
+      const folderResponse = await this.drive.files.create({
+        requestBody: fileMetadata,
+        fields: 'id, name'
+      });
+
+      return {
+        success: true,
+        folder: folderResponse.data
+      };
+    } catch (error) {
+      console.error('Error creating/getting folder in Google Drive:', error);
+      throw new Error(`Failed to create/get folder: ${error.message}`);
+    }
+  }
+
+  /**
+   * Upload file to a specific folder
+   */
+  async uploadFileToFolder(folderId, filename, content, mimeType = 'application/json') {
+    try {
+      const fileMetadata = {
+        name: filename,
+        parents: [folderId],
+        mimeType: mimeType
+      };
+
+      const media = {
+        mimeType: mimeType,
+        body: content
+      };
+
+      const response = await this.drive.files.create({
+        requestBody: fileMetadata,
+        media: media,
+        fields: 'id, name, mimeType, createdTime, modifiedTime, size'
+      });
+
+      return {
+        success: true,
+        file: response.data
+      };
+    } catch (error) {
+      console.error('Error uploading file to folder in Google Drive:', error);
+      throw new Error(`Failed to upload file to folder: ${error.message}`);
+    }
+  }
+
+  /**
+   * List files in a specific folder
+   */
+  async listFilesInFolder(folderId, pageSize = 100) {
+    try {
+      const query = `'${folderId}' in parents and trashed=false`;
+      return await this.listFiles(query, pageSize);
+    } catch (error) {
+      console.error('Error listing files in folder from Google Drive:', error);
+      throw new Error(`Failed to list files in folder: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get file metadata
+   */
+  async getFileMetadata(fileId) {
+    try {
+      const response = await this.drive.files.get({
+        fileId: fileId,
+        fields: 'id, name, mimeType, createdTime, modifiedTime, size'
+      });
+
+      return {
+        success: true,
+        file: response.data
+      };
+    } catch (error) {
+      console.error('Error getting file metadata from Google Drive:', error);
+      throw new Error(`Failed to get file metadata: ${error.message}`);
+    }
+  }
 }
 
 module.exports = GoogleDriveService;

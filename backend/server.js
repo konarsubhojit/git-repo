@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 // Import routes
 const authRoutes = require('./src/routes/auth');
 const syncRoutes = require('./src/routes/sync');
+const syncConfigRoutes = require('./src/routes/syncConfig');
 
 // Import passport configuration
 require('./src/auth/google');
@@ -56,7 +57,17 @@ app.get('/', (req, res) => {
         upload: 'POST /api/sync/upload',
         download: 'GET /api/sync/download',
         list: 'GET /api/sync/list',
-        delete: 'DELETE /api/sync/delete/:fileId'
+        delete: 'DELETE /api/sync/delete/:fileId',
+        folderUpload: 'POST /api/sync/folder/upload',
+        folderList: 'GET /api/sync/folder/list',
+        executeSync: 'POST /api/sync/execute/:configId'
+      },
+      syncConfig: {
+        list: 'GET /api/sync-config',
+        get: 'GET /api/sync-config/:configId',
+        create: 'POST /api/sync-config',
+        update: 'PUT /api/sync-config/:configId',
+        delete: 'DELETE /api/sync-config/:configId'
       }
     }
   });
@@ -64,6 +75,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/api/sync', syncRoutes);
+app.use('/api/sync-config', syncConfigRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

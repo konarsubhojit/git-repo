@@ -7,7 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -22,7 +23,8 @@ public class AccountSelectionActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_GET_ACCOUNTS = 1;
     
     private RecyclerView recyclerView;
-    private TextView noAccountsText;
+    private LinearLayout noAccountsLayout;
+    private ProgressBar loadingProgress;
     private AccountAdapter adapter;
     private List<Account> googleAccounts;
 
@@ -31,8 +33,14 @@ public class AccountSelectionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_selection);
         
+        // Enable back button in action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        
         recyclerView = findViewById(R.id.accountsRecyclerView);
-        noAccountsText = findViewById(R.id.noAccountsText);
+        noAccountsLayout = findViewById(R.id.noAccountsLayout);
+        loadingProgress = findViewById(R.id.loadingProgress);
         
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         googleAccounts = new ArrayList<>();
@@ -64,27 +72,40 @@ public class AccountSelectionActivity extends AppCompatActivity {
     }
     
     private void loadGoogleAccounts() {
-        AccountManager accountManager = AccountManager.get(this);
-        Account[] accounts = accountManager.getAccountsByType("com.google");
+        // Show loading state
+        showLoading();
         
-        googleAccounts.clear();
-        for (Account account : accounts) {
-            googleAccounts.add(account);
-        }
-        
-        if (googleAccounts.isEmpty()) {
-            showNoAccounts();
-        } else {
-            showAccounts();
-        }
+        // Load accounts in background (simulate delay for better UX visibility)
+        recyclerView.postDelayed(() -> {
+            AccountManager accountManager = AccountManager.get(this);
+            Account[] accounts = accountManager.getAccountsByType("com.google");
+            
+            googleAccounts.clear();
+            for (Account account : accounts) {
+                googleAccounts.add(account);
+            }
+            
+            if (googleAccounts.isEmpty()) {
+                showNoAccounts();
+            } else {
+                showAccounts();
+            }
+        }, 500); // Small delay to show loading state
+    }
+    
+    private void showLoading() {
+        loadingProgress.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        noAccountsLayout.setVisibility(View.GONE);
     }
     
     private void showAccounts() {
+        loadingProgress.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);
-        noAccountsText.setVisibility(View.GONE);
+        noAccountsLayout.setVisibility(View.GONE);
         
         adapter = new AccountAdapter(googleAccounts, account -> {
-            // Account selected
+            // Account selected - animate the selection
             Intent resultIntent = new Intent();
             resultIntent.putExtra("account_name", account.name);
             setResult(RESULT_OK, resultIntent);
@@ -95,7 +116,14 @@ public class AccountSelectionActivity extends AppCompatActivity {
     }
     
     private void showNoAccounts() {
+        loadingProgress.setVisibility(View.GONE);
         recyclerView.setVisibility(View.GONE);
-        noAccountsText.setVisibility(View.VISIBLE);
+        noAccountsLayout.setVisibility(View.VISIBLE);
+    }
+    
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 }

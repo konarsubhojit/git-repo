@@ -3,9 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
     app:cardElevation="2dp"
-    app:cardCornerRadius="8dp"
+    app:cardCornerRadius="12dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
@@ -15,14 +16,25 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:minHeight="72dp">
 
-        <ImageView
-            android:id="@+id/accountIcon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@android:drawable/sym_def_app_icon"
-            android:contentDescription="Account icon" />
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="@color/google_blue">
+
+            <ImageView
+                android:id="@+id/accountIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_account"
+                android:padding="12dp"
+                android:tint="@android:color/white"
+                android:contentDescription="@string/account_icon" />
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -38,7 +50,9 @@
                 android:text="Account Name"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/text_primary"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/accountEmail"
@@ -47,8 +61,19 @@
                 android:text="account@example.com"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
+                android:maxLines="1"
+                android:ellipsize="middle"
                 android:layout_marginTop="4dp" />
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/selectIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_send"
+            android:tint="@color/text_secondary"
+            android:layout_marginStart="12dp"
+            android:contentDescription="@string/select_account_icon" />
 
     </LinearLayout>
 

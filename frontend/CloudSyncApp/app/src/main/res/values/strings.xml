@@ -56,6 +56,38 @@
     <string name="no_accounts_icon">No accounts icon</string>
     <string name="select_account_icon">Select account icon</string>
     
+    <!-- Folder Sync Configuration -->
+    <string name="configure_folder_sync">Configure Folder Sync</string>
+    <string name="folder_sync_subtitle">Set up automatic synchronization between local and cloud folders</string>
+    <string name="folder_configuration">Folder Configuration</string>
+    <string name="local_folder_path">Local Folder Path</string>
+    <string name="cloud_folder_path">Cloud Folder Path</string>
+    <string name="browse_folder">Browse Folder</string>
+    <string name="sync_settings">Sync Settings</string>
+    <string name="cloud_provider">Cloud Provider</string>
+    <string name="sync_mode">Sync Mode</string>
+    <string name="delete_delay">Delete Delay</string>
+    <string name="delete_delay_hint">Files will be deleted after the specified delay</string>
+    <string name="save_configuration">Save Configuration</string>
+    <string name="cancel">Cancel</string>
+    <string name="manage_sync_configs">Manage Sync Configurations</string>
+    <string name="no_sync_configs">No sync configurations yet</string>
+    <string name="add_sync_config">Add Sync Configuration</string>
+    <string name="config_saved">Configuration saved successfully</string>
+    <string name="config_deleted">Configuration deleted</string>
+    <string name="sync_mode_upload_only">Upload Only</string>
+    <string name="sync_mode_upload_delete">Upload then Delete</string>
+    <string name="sync_mode_download_only">Download Only</string>
+    <string name="sync_mode_download_delete">Download then Delete</string>
+    <string name="sync_mode_two_way">Two-Way Sync</string>
+    
+    <!-- Sync Mode Descriptions -->
+    <string name="sync_mode_upload_only_desc">Upload files from local to cloud only</string>
+    <string name="sync_mode_upload_delete_desc">Upload files and delete from local after delay</string>
+    <string name="sync_mode_download_only_desc">Download files from cloud to local only</string>
+    <string name="sync_mode_download_delete_desc">Download files and delete from cloud after delay</string>
+    <string name="sync_mode_two_way_desc">Synchronize files in both directions</string>
+    
     <!-- Backend API Configuration -->
     <string name="backend_url">http://10.0.2.2:3000</string>
     <string name="backend_api_url">http://10.0.2.2:3000/api</string>

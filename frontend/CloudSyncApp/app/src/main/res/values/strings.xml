@@ -6,14 +6,20 @@
     
     <!-- Main Activity -->
     <string name="welcome_message">Welcome to Cloud Sync</string>
+    <string name="app_subtitle">Connect your cloud accounts and sync your data</string>
     <string name="select_google_account">Select Google Account</string>
     <string name="add_onedrive_account">Add OneDrive Account</string>
     <string name="manage_accounts">Manage Accounts</string>
     <string name="sync_data">Sync Data</string>
+    <string name="google_drive">Google Drive</string>
+    <string name="microsoft_onedrive">Microsoft OneDrive</string>
+    <string name="no_account_selected">No account selected</string>
     
     <!-- Account Selection -->
     <string name="choose_google_account">Choose a Google Account</string>
-    <string name="no_accounts_found">No Google accounts found on this device</string>
+    <string name="account_selection_subtitle">Select an account from your device</string>
+    <string name="no_accounts_found">No Google accounts found</string>
+    <string name="no_accounts_hint">Add a Google account in your device settings to get started</string>
     <string name="add_account">Add Account</string>
     <string name="account_selected">Account selected: %1$s</string>
     
@@ -22,6 +28,7 @@
     <string name="onedrive_sign_out">Sign out</string>
     <string name="onedrive_connected">Connected to OneDrive</string>
     <string name="onedrive_not_connected">Not connected to OneDrive</string>
+    <string name="onedrive_help_text">Sign in to access your OneDrive files and folders</string>
     <string name="sign_in_button">Sign In</string>
     <string name="sign_out_button">Sign Out</string>
     
@@ -32,11 +39,22 @@
     <string name="syncing">Syncing…</string>
     <string name="sync_complete">Sync complete</string>
     <string name="sync_failed">Sync failed: %1$s</string>
+    <string name="sync_confirmation">Are you sure you want to sync your data?</string>
+    <string name="sync_success">Data synced successfully!</string>
     
     <!-- Errors -->
     <string name="error_no_account">Please select an account first</string>
     <string name="error_auth_failed">Authentication failed</string>
     <string name="error_network">Network error. Please check your connection.</string>
+    
+    <!-- Content Descriptions -->
+    <string name="google_drive_icon">Google Drive icon</string>
+    <string name="onedrive_icon">OneDrive icon</string>
+    <string name="onedrive_logo">OneDrive logo</string>
+    <string name="status_icon">Status icon</string>
+    <string name="account_icon">Account icon</string>
+    <string name="no_accounts_icon">No accounts icon</string>
+    <string name="select_account_icon">Select account icon</string>
     
     <!-- Backend API Configuration -->
     <string name="backend_url">http://10.0.2.2:3000</string>

@@ -57,7 +57,7 @@
     <string name="select_account_icon">Select account icon</string>
     
     <!-- Folder Sync Configuration -->
-    <string name="configure_folder_sync">Configure Folder Sync</string>
+    <string name="configure_folder_sync">Manage Folder Sync</string>
     <string name="folder_sync_subtitle">Set up automatic synchronization between local and cloud folders</string>
     <string name="folder_configuration">Folder Configuration</string>
     <string name="local_folder_path">Local Folder Path</string>

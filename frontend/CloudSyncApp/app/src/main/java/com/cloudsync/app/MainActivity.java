@@ -79,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
         });
         
         configureFolderSyncButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, FolderSyncConfigActivity.class);
-            startActivityForResult(intent, REQUEST_FOLDER_SYNC_CONFIG);
+            Intent intent = new Intent(MainActivity.this, SyncConfigListActivity.class);
+            startActivity(intent);
         });
     }
     

@@ -48,6 +48,13 @@
             android:label="@string/configure_folder_sync"
             android:theme="@style/Theme.CloudSyncApp" />
         
+        <!-- Sync Config List Activity -->
+        <activity
+            android:name=".SyncConfigListActivity"
+            android:exported="false"
+            android:label="@string/manage_sync_configs"
+            android:theme="@style/Theme.CloudSyncApp" />
+        
         <!-- Browser Tab Activity for MSAL -->
         <activity android:name="com.microsoft.identity.client.BrowserTabActivity"
             android:exported="true">

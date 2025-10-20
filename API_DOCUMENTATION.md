@@ -248,6 +248,262 @@ All endpoints may return error responses in the following format:
 
 ---
 
+## Sync Configuration Endpoints
+
+### 1. Get All Sync Configurations
+**Endpoint:** `GET /api/sync-config`
+
+**Description:** Get all sync configurations for the authenticated user.
+
+**Authentication Required:** Yes
+
+**Response:**
+```json
+{
+  "success": true,
+  "configs": [
+    {
+      "id": "sync_123456",
+      "userId": "user_id",
+      "localFolderPath": "/storage/emulated/0/Documents",
+      "cloudFolderPath": "Documents",
+      "provider": "google",
+      "syncMode": "two_way",
+      "deleteDelayDays": 7,
+      "enabled": true,
+      "lastSyncTime": "2023-10-06T12:00:00Z",
+      "createdAt": "2023-10-01T10:00:00Z",
+      "updatedAt": "2023-10-06T12:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### 2. Create Sync Configuration
+**Endpoint:** `POST /api/sync-config`
+
+**Description:** Create a new sync configuration.
+
+**Authentication Required:** Yes
+
+**Request Body:**
+```json
+{
+  "localFolderPath": "/storage/emulated/0/Documents",
+  "cloudFolderPath": "Documents",
+  "provider": "google",
+  "syncMode": "two_way",
+  "deleteDelayDays": 7,
+  "enabled": true
+}
+```
+
+**Sync Modes:**
+- `upload_only`: Upload files from local to cloud only
+- `upload_then_delete`: Upload files and delete from local after specified delay
+- `download_only`: Download files from cloud to local only
+- `download_then_delete`: Download files and delete from cloud after specified delay
+- `two_way`: Synchronize files in both directions
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Sync configuration created successfully",
+  "config": {
+    "id": "sync_123456",
+    "userId": "user_id",
+    "localFolderPath": "/storage/emulated/0/Documents",
+    "cloudFolderPath": "Documents",
+    "provider": "google",
+    "syncMode": "two_way",
+    "deleteDelayDays": 7,
+    "enabled": true,
+    "lastSyncTime": null,
+    "createdAt": "2023-10-06T12:00:00Z",
+    "updatedAt": "2023-10-06T12:00:00Z"
+  }
+}
+```
+
+---
+
+### 3. Update Sync Configuration
+**Endpoint:** `PUT /api/sync-config/:configId`
+
+**Description:** Update an existing sync configuration.
+
+**Authentication Required:** Yes
+
+**Request Body:** (all fields optional)
+```json
+{
+  "localFolderPath": "/storage/emulated/0/NewFolder",
+  "cloudFolderPath": "NewFolder",
+  "syncMode": "upload_only",
+  "deleteDelayDays": 14,
+  "enabled": false
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Sync configuration updated successfully",
+  "config": {
+    "id": "sync_123456",
+    "userId": "user_id",
+    "localFolderPath": "/storage/emulated/0/NewFolder",
+    "cloudFolderPath": "NewFolder",
+    "provider": "google",
+    "syncMode": "upload_only",
+    "deleteDelayDays": 14,
+    "enabled": false,
+    "lastSyncTime": "2023-10-06T12:00:00Z",
+    "createdAt": "2023-10-01T10:00:00Z",
+    "updatedAt": "2023-10-06T13:00:00Z"
+  }
+}
+```
+
+---
+
+### 4. Delete Sync Configuration
+**Endpoint:** `DELETE /api/sync-config/:configId`
+
+**Description:** Delete a sync configuration.
+
+**Authentication Required:** Yes
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Sync configuration deleted successfully"
+}
+```
+
+---
+
+### 5. Execute Sync
+**Endpoint:** `POST /api/sync/execute/:configId`
+
+**Description:** Execute sync based on the configuration.
+
+**Authentication Required:** Yes
+
+**Request Body:** (for upload modes)
+```json
+{
+  "files": [
+    {
+      "filename": "document1.txt",
+      "content": "File content here"
+    },
+    {
+      "filename": "document2.txt",
+      "content": "Another file content"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Sync executed successfully",
+  "syncMode": "two_way",
+  "results": {
+    "uploaded": [
+      {
+        "id": "file_id_1",
+        "name": "document1.txt",
+        "size": "1024"
+      }
+    ],
+    "downloaded": [
+      {
+        "id": "file_id_2",
+        "name": "remote_file.txt",
+        "content": "Remote file content"
+      }
+    ],
+    "deleted": [],
+    "errors": []
+  }
+}
+```
+
+---
+
+### 6. Upload File to Folder
+**Endpoint:** `POST /api/sync/folder/upload`
+
+**Description:** Upload a file to a specific cloud folder.
+
+**Authentication Required:** Yes
+
+**Request Body:**
+```json
+{
+  "folderPath": "Documents",
+  "filename": "my_file.txt",
+  "content": "File content here"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "File uploaded to folder successfully",
+  "provider": "google",
+  "file": {
+    "id": "file_id",
+    "name": "my_file.txt",
+    "size": "1024"
+  }
+}
+```
+
+---
+
+### 7. List Files in Folder
+**Endpoint:** `GET /api/sync/folder/list?folderPath=Documents`
+
+**Description:** List all files in a specific cloud folder.
+
+**Authentication Required:** Yes
+
+**Query Parameters:**
+- `folderPath`: The path to the folder
+
+**Response:**
+```json
+{
+  "success": true,
+  "provider": "google",
+  "files": [
+    {
+      "id": "file_id_1",
+      "name": "document1.txt",
+      "size": "1024"
+    },
+    {
+      "id": "file_id_2",
+      "name": "document2.txt",
+      "size": "2048"
+    }
+  ]
+}
+```
+
+---
+
 ## Mobile App Integration Example
 
 ### JavaScript/React Native Example

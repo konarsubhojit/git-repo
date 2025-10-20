@@ -176,11 +176,23 @@ class OneDriveService {
    */
   async getOrCreateFolder(folderPath) {
     try {
-      const folderName = folderPath.replace(/^\/+|\/+$/g, ''); // Remove leading/trailing slashes
+      // Sanitize folder path to prevent ReDoS
+      let folderName = folderPath;
+      while (folderName.startsWith('/')) {
+        folderName = folderName.substring(1);
+      }
+      while (folderName.endsWith('/')) {
+        folderName = folderName.substring(0, folderName.length - 1);
+      }
+
+      // Validate folder name to prevent path traversal
+      if (!folderName || folderName.includes('..') || folderName.includes('\\')) {
+        throw new Error('Invalid folder path');
+      }
       
       // Try to get existing folder
       try {
-        const url = `${this.baseUrl}/me/drive/root:/${folderName}`;
+        const url = `${this.baseUrl}/me/drive/root:/${encodeURIComponent(folderName)}`;
         const response = await axios.get(url, {
           headers: this.headers
         });
@@ -226,7 +238,12 @@ class OneDriveService {
    */
   async uploadFileToFolder(folderId, filename, content) {
     try {
-      const url = `${this.baseUrl}/me/drive/items/${folderId}:/${filename}:/content`;
+      // Validate filename to prevent path traversal
+      if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+        throw new Error('Invalid filename');
+      }
+
+      const url = `${this.baseUrl}/me/drive/items/${folderId}:/${encodeURIComponent(filename)}:/content`;
       
       const response = await axios.put(url, content, {
         headers: {

@@ -215,6 +215,16 @@ router.post('/folder/upload', ensureAuthenticated, async (req, res, next) => {
       });
     }
 
+    // Validate inputs to prevent path traversal
+    if (folderPath.includes('..') || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return res.status(400).json({
+        error: {
+          message: 'Invalid folder path or filename',
+          status: 400
+        }
+      });
+    }
+
     const provider = req.user.provider;
     let result;
 
@@ -258,6 +268,16 @@ router.get('/folder/list', ensureAuthenticated, async (req, res, next) => {
       return res.status(400).json({
         error: {
           message: 'folderPath is required',
+          status: 400
+        }
+      });
+    }
+
+    // Validate input to prevent path traversal
+    if (folderPath.includes('..')) {
+      return res.status(400).json({
+        error: {
+          message: 'Invalid folder path',
           status: 400
         }
       });

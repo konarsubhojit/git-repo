@@ -140,7 +140,19 @@ class GoogleDriveService {
    */
   async getOrCreateFolder(folderPath) {
     try {
-      const folderName = folderPath.replace(/^\/+|\/+$/g, ''); // Remove leading/trailing slashes
+      // Sanitize folder path to prevent ReDoS
+      let folderName = folderPath;
+      while (folderName.startsWith('/')) {
+        folderName = folderName.substring(1);
+      }
+      while (folderName.endsWith('/')) {
+        folderName = folderName.substring(0, folderName.length - 1);
+      }
+
+      // Validate folder name to prevent path traversal
+      if (!folderName || folderName.includes('..') || folderName.includes('\\')) {
+        throw new Error('Invalid folder path');
+      }
       
       // Search for existing folder
       const query = `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
@@ -183,6 +195,11 @@ class GoogleDriveService {
    */
   async uploadFileToFolder(folderId, filename, content, mimeType = 'application/json') {
     try {
+      // Validate filename to prevent path traversal
+      if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+        throw new Error('Invalid filename');
+      }
+
       const fileMetadata = {
         name: filename,
         parents: [folderId],

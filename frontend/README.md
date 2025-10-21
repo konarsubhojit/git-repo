@@ -299,56 +299,476 @@ CloudSyncApp/
   - Must delete existing config to add new one
   - Counter shows "10/10"
 
-## Permissions
+## 🔐 Permissions
 
-The app requires the following permissions:
+The app requires the following Android permissions:
 
-- `INTERNET`: For communicating with the backend API and cloud services
-- `GET_ACCOUNTS`: For retrieving Google accounts from the device
-- `USE_CREDENTIALS`: For accessing account credentials
+| Permission | Purpose | Required When |
+|------------|---------|---------------|
+| `INTERNET` | Backend API and cloud service communication | Always (automatic) |
+| `GET_ACCOUNTS` | Retrieve Google accounts from device | Google Drive integration |
+| `USE_CREDENTIALS` | Access account credentials | Google Drive integration |
+| `READ_EXTERNAL_STORAGE` | Browse local folders | Local folder selection |
+| `WRITE_EXTERNAL_STORAGE` | File sync operations | File upload/download |
 
-## Dependencies
+### Permission Handling
 
-- **AndroidX Libraries**: Core Android components
-- **Material Components**: Material Design UI components
-- **Google Play Services Auth**: Google Sign-In and account access
-- **Microsoft Authentication Library (MSAL)**: OneDrive authentication
-- **Retrofit**: HTTP client for API calls
-- **OkHttp**: HTTP client and logging
+**Runtime Permissions** (Android 6.0+):
+- Storage permissions requested when needed
+- User can grant or deny
+- App provides fallback if denied
 
-## Troubleshooting
+**Automatic Permissions**:
+- `INTERNET` granted automatically
+- No user action required
 
-### Google Account Selection Not Working
+### Granting Permissions Manually
 
-- Make sure you have at least one Google account added to your device
-- Grant the GET_ACCOUNTS permission when prompted
-- On Android 6.0+, you may need to manually grant the permission in Settings
+If permissions are denied or not working:
 
-### OneDrive Authentication Fails
+1. Open **Settings** on your device
+2. Navigate to **Apps** → **Cloud Sync**
+3. Tap **Permissions**
+4. Enable required permissions:
+   - Storage
+   - Contacts (for GET_ACCOUNTS)
 
-- Verify your MSAL configuration in `auth_config_msal.json`
-- Check that the signature hash is correct
-- Ensure the redirect URI is properly configured in Azure Portal
-- Make sure API permissions are granted in Azure Portal
+## 📚 Dependencies
 
-### Cannot Connect to Backend
+### Core Libraries
 
-- Verify the backend URL in `strings.xml`
-- For emulator, use `http://10.0.2.2:3000` for localhost
-- For physical device, use your computer's IP address
-- Make sure the backend server is running
+| Library | Version | Purpose |
+|---------|---------|---------|
+| **AndroidX Core** | Latest | Core Android components |
+| **AndroidX AppCompat** | Latest | Backward compatibility |
+| **Material Components** | Latest | Material Design 3 UI |
+| **ConstraintLayout** | Latest | Flexible layouts |
 
-## Security Notes
+### Authentication
 
-- Never commit your Microsoft Client ID or other secrets to version control
-- Use different OAuth credentials for production builds
-- Always use HTTPS in production
-- Store access tokens securely using Android Keystore
+| Library | Version | Purpose |
+|---------|---------|---------|
+| **Google Play Services Auth** | Latest | Google account selection |
+| **MSAL (Microsoft Authentication Library)** | 4.x | OneDrive authentication |
 
-## Contributing
+### Networking
 
-See the main [CONTRIBUTING.md](../../CONTRIBUTING.md) for contribution guidelines.
+| Library | Version | Purpose |
+|---------|---------|---------|
+| **Retrofit** | 2.9.x | Type-safe HTTP client |
+| **OkHttp** | 4.x | HTTP client |
+| **OkHttp Logging Interceptor** | 4.x | Network debugging |
+| **Gson** | 2.x | JSON serialization |
 
-## License
+### Utilities
 
-MIT
+| Library | Version | Purpose |
+|---------|---------|---------|
+| **RecyclerView** | Latest | List displays |
+| **CardView** | Latest | Card-based layouts |
+| **SwipeRefreshLayout** | Latest | Pull-to-refresh |
+
+### Build Configuration
+
+All dependencies are managed in `app/build.gradle`:
+
+```gradle
+dependencies {
+    // AndroidX
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    
+    // Google Auth
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    
+    // Microsoft Auth
+    implementation 'com.microsoft.identity.client:msal:4.9.0'
+    
+    // Networking
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
+}
+```
+
+## 🔧 Troubleshooting
+
+### Build & Installation Issues
+
+**❌ Gradle sync fails**
+
+**Solution:**
+```bash
+# In Android Studio:
+File → Invalidate Caches → Invalidate and Restart
+
+# Or clean and rebuild:
+Build → Clean Project
+Build → Rebuild Project
+```
+
+---
+
+**❌ App won't install on device**
+
+**Solution:**
+- Check device has enough storage space
+- Uninstall previous version
+- Enable "Install from unknown sources" for development
+- Check USB debugging is enabled
+- Try `adb uninstall com.cloudsync.app`
+
+---
+
+**❌ Build error: SDK not found**
+
+**Solution:**
+1. Open SDK Manager (Tools → SDK Manager)
+2. Install Android SDK Platform 24+
+3. Install Build Tools 30.0.3+
+4. Sync Gradle files
+
+### Authentication Issues
+
+**❌ Google account selection not working**
+
+**Solution:**
+- ✅ Add at least one Google account to device
+- ✅ Grant GET_ACCOUNTS permission
+- ✅ Check Settings → Apps → Cloud Sync → Permissions → Contacts
+- ✅ Try logging out and back into Google account on device
+- ✅ Clear app data: Settings → Apps → Cloud Sync → Storage → Clear Data
+
+---
+
+**❌ OneDrive authentication fails**
+
+**Solution:**
+- ✅ Verify MSAL configuration in `auth_config_msal.json`
+- ✅ Check signature hash matches in all 3 locations:
+  - `auth_config_msal.json`
+  - `AndroidManifest.xml`
+  - Azure Portal
+- ✅ Ensure redirect URI format: `msauth://com.cloudsync.app/YOUR_HASH`
+- ✅ Verify API permissions granted in Azure Portal
+- ✅ Check admin consent granted
+- ✅ Clear app data and try again
+
+---
+
+**❌ "Authentication failed" error**
+
+**Solution:**
+- Check internet connectivity
+- Verify backend server is running
+- Check backend URL is correct
+- Review LogCat for detailed errors
+
+### Backend Connection Issues
+
+**❌ Cannot connect to backend**
+
+**Solution:**
+
+**For Emulator:**
+```xml
+<string name="backend_url">http://10.0.2.2:3000</string>
+```
+
+**For Physical Device:**
+1. Find your computer's IP:
+   ```bash
+   # Mac/Linux
+   ifconfig | grep "inet "
+   
+   # Windows
+   ipconfig
+   ```
+2. Update `strings.xml`:
+   ```xml
+   <string name="backend_url">http://YOUR_IP:3000</string>
+   ```
+3. Ensure device and computer on same network
+4. Check firewall isn't blocking port 3000
+
+---
+
+**❌ Connection timeout**
+
+**Solution:**
+- ✅ Verify backend server is running: `curl http://localhost:3000/auth/status`
+- ✅ Check device has internet access
+- ✅ Test connectivity: `adb shell ping YOUR_COMPUTER_IP`
+- ✅ Disable VPN if active
+- ✅ Check router firewall settings
+
+### App Functionality Issues
+
+**❌ App crashes on startup**
+
+**Solution:**
+1. Check LogCat for error stack trace
+2. Common causes:
+   - Missing backend URL
+   - Invalid MSAL configuration
+   - Permission issues
+3. Clear app data and reinstall
+4. Check all required files present
+
+---
+
+**❌ Local folder picker shows "No folders"**
+
+**Solution:**
+- Grant storage permissions
+- Check external storage is mounted
+- Try different folder (some may be restricted)
+- Restart app after granting permissions
+
+---
+
+**❌ Cloud folder picker shows errors**
+
+**Solution:**
+- Verify internet connection
+- Re-authenticate with cloud provider
+- Check backend server logs
+- Ensure cloud provider API is accessible
+
+---
+
+**❌ Sync fails or hangs**
+
+**Solution:**
+- Check both local and cloud folders accessible
+- Verify sufficient permissions
+- Check network stability
+- Review LogCat for specific errors
+- Try smaller files first
+
+---
+
+**❌ "Maximum configurations reached" but count shows less than 10**
+
+**Solution:**
+```bash
+# Clear app data to reset:
+Settings → Apps → Cloud Sync → Storage → Clear Data
+```
+
+### Debugging Tips
+
+#### View Logs
+
+```bash
+# View all app logs
+adb logcat | grep "CloudSync"
+
+# View errors only
+adb logcat *:E | grep "CloudSync"
+
+# Save logs to file
+adb logcat > logs.txt
+```
+
+#### Check App Info
+
+```bash
+# Check if app is installed
+adb shell pm list packages | grep cloudsync
+
+# Check app version
+adb shell dumpsys package com.cloudsync.app | grep versionName
+
+# Check granted permissions
+adb shell dumpsys package com.cloudsync.app | grep permission
+```
+
+#### Network Debugging
+
+```bash
+# Check if backend is reachable from device
+adb shell curl -v http://10.0.2.2:3000/auth/status
+
+# Test with device IP
+adb shell curl -v http://YOUR_COMPUTER_IP:3000/auth/status
+```
+
+### Common Error Messages
+
+| Error | Meaning | Solution |
+|-------|---------|----------|
+| `NetworkOnMainThreadException` | Network call on UI thread | Already handled with async operations |
+| `UnknownHostException` | Cannot resolve backend hostname | Check backend URL and connectivity |
+| `ConnectException` | Cannot connect to backend | Verify backend running and URL correct |
+| `SecurityException` | Missing permission | Grant required permission |
+| `MsalClientException` | MSAL configuration error | Check MSAL config files |
+
+### Getting Help
+
+If issues persist:
+
+1. **Check LogCat** for detailed error messages
+2. **Review documentation** for similar issues
+3. **Search existing issues** on GitHub
+4. **Create new issue** with:
+   - Android version
+   - Device model
+   - Steps to reproduce
+   - Error messages from LogCat
+   - Screenshots if applicable
+
+## 🔒 Security Notes
+
+### Development Security
+
+- ⚠️ **Never commit secrets** to version control
+  - Microsoft Client ID in `auth_config_msal.json`
+  - Backend URLs with credentials
+  - API keys or tokens
+- ⚠️ **Use debug keystore** only for development
+- ⚠️ **Different credentials** for dev and production
+
+### Production Security Checklist
+
+#### Code Obfuscation
+Enable ProGuard/R8 in `app/build.gradle`:
+```gradle
+android {
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+```
+
+#### Signing Configuration
+Create production keystore:
+```bash
+keytool -genkey -v -keystore release-keystore.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias release-key
+```
+
+**Never commit keystores to version control!**
+
+#### Network Security
+Configure network security in `res/xml/network_security_config.xml`:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <!-- Only for development -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>
+```
+
+#### Token Storage
+- ✅ Use Android Keystore for sensitive data
+- ✅ Don't store tokens in SharedPreferences (for production)
+- ✅ Implement token encryption
+- ✅ Clear tokens on logout
+
+#### Best Practices
+- 🔐 Use HTTPS for all network calls in production
+- 🔐 Validate SSL certificates
+- 🔐 Implement certificate pinning for critical apps
+- 🔐 Sanitize all user inputs
+- 🔐 Use SQLCipher for encrypted database (if needed)
+- 🔐 Enable Google Play App Signing
+- 🔐 Regular security audits
+
+### OAuth Security
+
+#### Google OAuth
+- Use official Google Sign-In library
+- Request minimal required scopes
+- Validate tokens server-side
+- Handle token refresh properly
+
+#### Microsoft OAuth (MSAL)
+- Keep MSAL library updated
+- Use broker authentication when available
+- Implement proper token caching
+- Handle authentication errors gracefully
+
+### Data Protection
+
+- **Local Data**: Sync configurations stored in app-private SharedPreferences
+- **In Transit**: Use HTTPS for backend communication
+- **At Rest**: Consider encrypting sensitive local data
+- **User Privacy**: Follow data minimization principles
+
+## 🤝 Contributing
+
+We welcome contributions to improve the Android app!
+
+### How to Contribute
+
+1. **Fork the repository**
+2. **Create a feature branch**
+3. **Make your changes**
+4. **Test thoroughly** on multiple devices/versions
+5. **Submit a pull request**
+
+See the main [CONTRIBUTING.md](../../CONTRIBUTING.md) for detailed guidelines.
+
+### Areas for Contribution
+
+- 🐛 Bug fixes
+- ✨ New features
+- 🎨 UI improvements
+- 📝 Documentation
+- 🧪 Tests
+- 🌍 Translations
+- ♿ Accessibility improvements
+
+## 📚 Additional Resources
+
+### Documentation
+- [Main README](../../README.md) - Project overview
+- [Backend README](../../backend/README.md) - Backend setup
+- [API Documentation](../../API_DOCUMENTATION.md) - API reference
+- [Quick Start Guide](../../QUICKSTART.md) - Fast setup
+- [Multiple Folder Bindings](../../MULTIPLE_FOLDER_BINDINGS.md) - Feature documentation
+
+### Android Development
+- [Android Developers](https://developer.android.com/) - Official documentation
+- [Material Design](https://material.io/develop/android) - Design guidelines
+- [Android Jetpack](https://developer.android.com/jetpack) - Modern Android components
+
+### APIs & Libraries
+- [Google Play Services Auth](https://developers.google.com/identity/sign-in/android)
+- [MSAL for Android](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-android-overview)
+- [Retrofit](https://square.github.io/retrofit/)
+- [OkHttp](https://square.github.io/okhttp/)
+
+### Community
+- [GitHub Issues](../../../../issues) - Bug reports and features
+- [GitHub Discussions](../../../../discussions) - Questions and ideas
+- [Stack Overflow](https://stackoverflow.com/questions/tagged/android) - Technical questions
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+
+---
+
+<div align="center">
+  <strong>Android Cloud Sync App</strong>
+  <br>
+  <sub>Part of the Cloud Sync Application</sub>
+  <br><br>
+  <sub>Built with Material Design 3 and modern Android practices</sub>
+</div>

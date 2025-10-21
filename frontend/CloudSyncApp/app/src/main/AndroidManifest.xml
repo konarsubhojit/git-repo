@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -53,6 +55,20 @@
             android:name=".SyncConfigListActivity"
             android:exported="false"
             android:label="@string/manage_sync_configs"
+            android:theme="@style/Theme.CloudSyncApp" />
+        
+        <!-- Local Folder Picker Activity -->
+        <activity
+            android:name=".LocalFolderPickerActivity"
+            android:exported="false"
+            android:label="@string/select_local_folder"
+            android:theme="@style/Theme.CloudSyncApp" />
+        
+        <!-- Cloud Folder Picker Activity -->
+        <activity
+            android:name=".CloudFolderPickerActivity"
+            android:exported="false"
+            android:label="@string/select_cloud_folder"
             android:theme="@style/Theme.CloudSyncApp" />
         
         <!-- Browser Tab Activity for MSAL -->

@@ -481,4 +481,52 @@ router.post('/execute/:configId', ensureAuthenticated, async (req, res, next) =>
   }
 });
 
+/**
+ * List folders in cloud storage
+ * GET /api/sync/folders/list?folderPath=xxx&provider=google|microsoft
+ */
+router.get('/folders/list', ensureAuthenticated, async (req, res, next) => {
+  try {
+    const { folderPath, provider } = req.query;
+
+    if (!provider || (provider !== 'google' && provider !== 'microsoft')) {
+      return res.status(400).json({
+        error: {
+          message: 'Provider parameter is required and must be either "google" or "microsoft"',
+          status: 400
+        }
+      });
+    }
+
+    // Validate input to prevent path traversal
+    if (folderPath && folderPath.includes('..')) {
+      return res.status(400).json({
+        error: {
+          message: 'Invalid folder path',
+          status: 400
+        }
+      });
+    }
+
+    let result;
+
+    if (provider === 'google') {
+      const driveService = new GoogleDriveService(req.user.accessToken);
+      result = await driveService.listFoldersInPath(folderPath || '');
+    } else if (provider === 'microsoft') {
+      const driveService = new OneDriveService(req.user.accessToken);
+      result = await driveService.listFoldersInPath(folderPath || '');
+    }
+
+    res.json({
+      success: true,
+      provider: provider,
+      currentPath: folderPath || '/',
+      folders: result.folders
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

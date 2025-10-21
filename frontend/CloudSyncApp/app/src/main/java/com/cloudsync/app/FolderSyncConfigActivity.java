@@ -20,6 +20,7 @@ import com.google.android.material.textfield.TextInputLayout;
 
 public class FolderSyncConfigActivity extends AppCompatActivity {
     private static final int REQUEST_SELECT_LOCAL_FOLDER = 1001;
+    private static final int REQUEST_SELECT_CLOUD_FOLDER = 1002;
     
     private TextInputEditText localFolderInput;
     private TextInputEditText cloudFolderInput;
@@ -29,10 +30,12 @@ public class FolderSyncConfigActivity extends AppCompatActivity {
     private Slider deleteDelaySlider;
     private TextView deleteDelayValue;
     private MaterialButton selectLocalFolderButton;
+    private MaterialButton selectCloudFolderButton;
     private MaterialButton saveConfigButton;
     private MaterialButton cancelButton;
     
     private String selectedLocalFolder = "";
+    private String selectedCloudFolder = "";
     private SyncMode selectedSyncMode = SyncMode.UPLOAD_ONLY;
     private String selectedProvider = "google";
     private int deleteDelayDays = 0;
@@ -59,6 +62,7 @@ public class FolderSyncConfigActivity extends AppCompatActivity {
         deleteDelaySlider = findViewById(R.id.deleteDelaySlider);
         deleteDelayValue = findViewById(R.id.deleteDelayValue);
         selectLocalFolderButton = findViewById(R.id.selectLocalFolderButton);
+        selectCloudFolderButton = findViewById(R.id.selectCloudFolderButton);
         saveConfigButton = findViewById(R.id.saveConfigButton);
         cancelButton = findViewById(R.id.cancelButton);
     }
@@ -134,15 +138,41 @@ public class FolderSyncConfigActivity extends AppCompatActivity {
     private void setupClickListeners() {
         selectLocalFolderButton.setOnClickListener(v -> selectLocalFolder());
         
+        selectCloudFolderButton.setOnClickListener(v -> selectCloudFolder());
+        
         saveConfigButton.setOnClickListener(v -> saveConfiguration());
         
         cancelButton.setOnClickListener(v -> finish());
     }
     
     private void selectLocalFolder() {
-        // For simplicity, we'll let users type the folder path
-        // In a production app, you'd use SAF (Storage Access Framework) to select folders
-        showSnackbar("Please enter the local folder path manually");
+        Intent intent = new Intent(this, LocalFolderPickerActivity.class);
+        startActivityForResult(intent, REQUEST_SELECT_LOCAL_FOLDER);
+    }
+    
+    private void selectCloudFolder() {
+        Intent intent = new Intent(this, CloudFolderPickerActivity.class);
+        intent.putExtra("provider", selectedProvider);
+        startActivityForResult(intent, REQUEST_SELECT_CLOUD_FOLDER);
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            if (requestCode == REQUEST_SELECT_LOCAL_FOLDER) {
+                selectedLocalFolder = data.getStringExtra("folder_path");
+                if (selectedLocalFolder != null) {
+                    localFolderInput.setText(selectedLocalFolder);
+                }
+            } else if (requestCode == REQUEST_SELECT_CLOUD_FOLDER) {
+                selectedCloudFolder = data.getStringExtra("folder_path");
+                if (selectedCloudFolder != null) {
+                    cloudFolderInput.setText(selectedCloudFolder);
+                }
+            }
+        }
     }
     
     private void saveConfiguration() {

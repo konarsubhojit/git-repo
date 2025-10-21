@@ -27,11 +27,16 @@ A full-stack application that enables syncing data from mobile apps to cloud sto
 - **OneDrive Integration**: OAuth 2.0 authentication and file operations
 - **RESTful API**: Easy-to-use API endpoints for mobile app integration
 - **Secure Authentication**: Session-based authentication with OAuth 2.0
+- **Folder Browsing API**: Browse cloud storage folders for easy selection
 
 ### Frontend (Android)
 - **Google Account Selection**: Select from already logged-in Google accounts on device
 - **OneDrive Account Management**: Add and manage OneDrive accounts
-- **Cloud Sync**: Sync data to Google Drive or OneDrive
+- **Multiple Folder Sync (NEW)**: Configure up to 10 folder pair synchronizations
+- **Local Folder Picker**: Browse and select local device folders
+- **Cloud Folder Picker**: Browse and select cloud storage folders (Google Drive/OneDrive)
+- **Sync Configuration Management**: Create, view, enable/disable, and delete sync configurations
+- **5 Sync Modes**: Upload Only, Upload then Delete, Download Only, Download then Delete, Two-Way Sync
 - **Material Design**: Modern Android UI with Material Design components
 
 ## Quick Start
@@ -70,9 +75,15 @@ See [backend/README.md](backend/README.md) for detailed backend documentation.
 
 See [frontend/README.md](frontend/README.md) for detailed Android app documentation.
 
-## API Documentation
+## Documentation
 
-For detailed API documentation, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
+- **[API Documentation](API_DOCUMENTATION.md)**: Complete API reference
+- **[Multiple Folder Bindings](MULTIPLE_FOLDER_BINDINGS.md)**: Feature documentation for multi-folder sync
+- **[Folder Selection Guide](FOLDER_SELECTION_GUIDE.md)**: Step-by-step user guide
+- **[Architecture Diagram](ARCHITECTURE_DIAGRAM.md)**: System architecture and data flows
+- **[Folder Sync Feature](FOLDER_SYNC_FEATURE.md)**: Original folder sync documentation
+- **[Quick Start Guide](QUICKSTART.md)**: Get started quickly
+- **[Contributing](CONTRIBUTING.md)**: Contribution guidelines
 
 ## Usage Example
 

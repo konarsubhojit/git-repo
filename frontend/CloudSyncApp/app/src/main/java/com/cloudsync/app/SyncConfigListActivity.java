@@ -14,6 +14,8 @@ import com.cloudsync.app.api.ApiClient;
 import com.cloudsync.app.api.SyncConfigService;
 import com.cloudsync.app.api.responses.SyncConfigListResponse;
 import com.cloudsync.app.models.SyncConfig;
+import com.cloudsync.app.models.SyncMode;
+import com.cloudsync.app.utils.SyncConfigManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -27,8 +29,10 @@ public class SyncConfigListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private SyncConfigAdapter adapter;
     private TextView emptyStateText;
+    private TextView configCountText;
     private FloatingActionButton fabAdd;
     private SyncConfigService apiService;
+    private SyncConfigManager configManager;
     
     private static final int REQUEST_ADD_CONFIG = 1001;
 
@@ -38,6 +42,7 @@ public class SyncConfigListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sync_config_list);
         
         apiService = ApiClient.getClient().create(SyncConfigService.class);
+        configManager = new SyncConfigManager(this);
         
         initializeViews();
         setupRecyclerView();
@@ -47,11 +52,16 @@ public class SyncConfigListActivity extends AppCompatActivity {
     private void initializeViews() {
         recyclerView = findViewById(R.id.recyclerView);
         emptyStateText = findViewById(R.id.emptyStateText);
+        configCountText = findViewById(R.id.configCountText);
         fabAdd = findViewById(R.id.fabAdd);
         
         fabAdd.setOnClickListener(v -> {
-            Intent intent = new Intent(this, FolderSyncConfigActivity.class);
-            startActivityForResult(intent, REQUEST_ADD_CONFIG);
+            if (configManager.hasReachedMaxLimit()) {
+                showSnackbar(getString(R.string.max_configs_reached));
+            } else {
+                Intent intent = new Intent(this, FolderSyncConfigActivity.class);
+                startActivityForResult(intent, REQUEST_ADD_CONFIG);
+            }
         });
     }
     
@@ -75,25 +85,20 @@ public class SyncConfigListActivity extends AppCompatActivity {
     }
     
     private void loadConfigurations() {
-        // For now, show local configurations
-        // In production, load from backend API
-        List<SyncConfig> configs = loadLocalConfigs();
+        List<SyncConfig> configs = configManager.getAllConfigs();
         updateUI(configs);
-    }
-    
-    private List<SyncConfig> loadLocalConfigs() {
-        // Load from SharedPreferences or local storage
-        // This is a placeholder - implement actual storage
-        return new java.util.ArrayList<>();
     }
     
     private void updateUI(List<SyncConfig> configs) {
         if (configs == null || configs.isEmpty()) {
             recyclerView.setVisibility(View.GONE);
             emptyStateText.setVisibility(View.VISIBLE);
+            configCountText.setVisibility(View.GONE);
         } else {
             recyclerView.setVisibility(View.VISIBLE);
             emptyStateText.setVisibility(View.GONE);
+            configCountText.setVisibility(View.VISIBLE);
+            configCountText.setText(getString(R.string.config_count, configs.size(), 10));
             adapter.setConfigs(configs);
         }
     }
@@ -162,18 +167,39 @@ public class SyncConfigListActivity extends AppCompatActivity {
     }
     
     private void deleteConfig(SyncConfig config) {
-        // Delete from local storage and refresh
-        showSnackbar("Configuration deleted");
-        loadConfigurations();
+        boolean deleted = configManager.deleteConfig(config.getId());
+        if (deleted) {
+            showSnackbar("Configuration deleted");
+            loadConfigurations();
+        } else {
+            showSnackbar("Failed to delete configuration");
+        }
     }
     
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         
-        if (requestCode == REQUEST_ADD_CONFIG && resultCode == RESULT_OK) {
-            // Reload configurations
-            loadConfigurations();
+        if (requestCode == REQUEST_ADD_CONFIG && resultCode == RESULT_OK && data != null) {
+            // Create new config from result
+            String localFolder = data.getStringExtra("local_folder");
+            String cloudFolder = data.getStringExtra("cloud_folder");
+            String syncModeValue = data.getStringExtra("sync_mode");
+            String provider = data.getStringExtra("provider");
+            int deleteDelayDays = data.getIntExtra("delete_delay_days", 0);
+            
+            // Convert sync mode string to enum
+            SyncMode syncMode = SyncMode.fromValue(syncModeValue);
+            
+            SyncConfig config = new SyncConfig(localFolder, cloudFolder, provider, syncMode, deleteDelayDays);
+            
+            boolean added = configManager.addConfig(config);
+            if (added) {
+                showSnackbar("Configuration saved successfully");
+                loadConfigurations();
+            } else {
+                showSnackbar(getString(R.string.max_configs_reached));
+            }
         }
     }
     

@@ -67,6 +67,17 @@ router.post('/', ensureAuthenticated, async (req, res, next) => {
     const userId = req.user.id;
     const { localFolderPath, cloudFolderPath, provider, syncMode, deleteDelayDays, enabled } = req.body;
     
+    // Check maximum number of configurations (10 max)
+    const existingConfigs = SyncConfigRepository.findByUserId(userId);
+    if (existingConfigs.length >= 10) {
+      return res.status(400).json({
+        error: {
+          message: 'Maximum number of sync configurations (10) reached. Please delete an existing configuration to add a new one.',
+          status: 400
+        }
+      });
+    }
+    
     // Validation
     if (!localFolderPath || !cloudFolderPath || !provider || !syncMode) {
       return res.status(400).json({

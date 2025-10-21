@@ -259,6 +259,55 @@ class GoogleDriveService {
       throw new Error(`Failed to get file metadata: ${error.message}`);
     }
   }
+
+  /**
+   * List folders in Google Drive (optionally in a specific parent folder)
+   */
+  async listFolders(parentFolderId = null, pageSize = 100) {
+    try {
+      let query = "mimeType='application/vnd.google-apps.folder' and trashed=false";
+      
+      if (parentFolderId) {
+        query = `'${parentFolderId}' in parents and ${query}`;
+      }
+
+      const response = await this.drive.files.list({
+        q: query,
+        fields: 'files(id, name, mimeType, createdTime, modifiedTime)',
+        pageSize: pageSize,
+        orderBy: 'name'
+      });
+
+      return {
+        success: true,
+        folders: response.data.files || []
+      };
+    } catch (error) {
+      console.error('Error listing folders from Google Drive:', error);
+      throw new Error(`Failed to list folders: ${error.message}`);
+    }
+  }
+
+  /**
+   * List folders in a specific cloud path
+   */
+  async listFoldersInPath(folderPath = '') {
+    try {
+      if (!folderPath || folderPath === '/' || folderPath === '') {
+        // List root level folders
+        return await this.listFolders(null);
+      }
+
+      // Get or create the folder first
+      const folderResult = await this.getOrCreateFolder(folderPath);
+      
+      // List subfolders
+      return await this.listFolders(folderResult.folder.id);
+    } catch (error) {
+      console.error('Error listing folders in path from Google Drive:', error);
+      throw new Error(`Failed to list folders in path: ${error.message}`);
+    }
+  }
 }
 
 module.exports = GoogleDriveService;

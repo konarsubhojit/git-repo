@@ -328,6 +328,61 @@ class OneDriveService {
       throw new Error(`Failed to get file metadata: ${error.response?.data?.error?.message || error.message}`);
     }
   }
+
+  /**
+   * List folders in OneDrive (optionally in a specific parent folder)
+   */
+  async listFolders(parentFolderId = null) {
+    try {
+      let url;
+      if (parentFolderId) {
+        url = `${this.baseUrl}/me/drive/items/${parentFolderId}/children?$filter=folder ne null&$orderby=name`;
+      } else {
+        url = `${this.baseUrl}/me/drive/root/children?$filter=folder ne null&$orderby=name`;
+      }
+      
+      const response = await axios.get(url, {
+        headers: this.headers
+      });
+
+      const folders = response.data.value.map(folder => ({
+        id: folder.id,
+        name: folder.name,
+        createdDateTime: folder.createdDateTime,
+        lastModifiedDateTime: folder.lastModifiedDateTime,
+        webUrl: folder.webUrl
+      }));
+
+      return {
+        success: true,
+        folders: folders
+      };
+    } catch (error) {
+      console.error('Error listing folders from OneDrive:', error.response?.data || error.message);
+      throw new Error(`Failed to list folders: ${error.response?.data?.error?.message || error.message}`);
+    }
+  }
+
+  /**
+   * List folders in a specific cloud path
+   */
+  async listFoldersInPath(folderPath = '') {
+    try {
+      if (!folderPath || folderPath === '/' || folderPath === '') {
+        // List root level folders
+        return await this.listFolders(null);
+      }
+
+      // Get or create the folder first
+      const folderResult = await this.getOrCreateFolder(folderPath);
+      
+      // List subfolders
+      return await this.listFolders(folderResult.folder.id);
+    } catch (error) {
+      console.error('Error listing folders in path from OneDrive:', error.response?.data || error.message);
+      throw new Error(`Failed to list folders in path: ${error.response?.data?.error?.message || error.message}`);
+    }
+  }
 }
 
 module.exports = OneDriveService;

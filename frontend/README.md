@@ -1,21 +1,74 @@
 # Cloud Sync Android App
 
-An Android application that allows users to sync data to Google Drive and OneDrive cloud storage providers.
+A powerful Android mobile application for synchronizing device files with Google Drive and OneDrive. Features Material Design 3 UI, multiple sync configurations, and comprehensive folder management.
 
-## Features
+## 📋 Table of Contents
 
-- **Google Account Selection**: Select from already logged-in Google accounts on the device
-- **OneDrive Account Management**: Sign in and manage OneDrive accounts using Microsoft Authentication Library (MSAL)
-- **Cloud Storage Sync**: Upload and download data to/from cloud storage
-- **Material Design**: Modern Android UI with Material Design 3 components
-- **Secure Authentication**: OAuth 2.0 authentication for both Google and OneDrive
+- [Features](#-features)
+- [Requirements](#-requirements)
+- [Setup Instructions](#-setup-instructions)
+- [App Structure](#-app-structure)
+- [Usage Guide](#-usage-guide)
+- [Permissions](#-permissions)
+- [Dependencies](#-dependencies)
+- [Troubleshooting](#-troubleshooting)
+- [Security](#-security-notes)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-## Requirements
+## ✨ Features
 
-- Android Studio Arctic Fox or later
-- Android SDK 24 or higher (Android 7.0+)
-- Gradle 8.0+
-- Java 8 or higher
+### 🔐 Authentication
+- **Google Account Integration**: Select from device accounts using Google Play Services
+- **OneDrive/Microsoft Login**: MSAL-powered authentication for Microsoft accounts
+- **Multi-Account Support**: Switch between Google and OneDrive accounts
+- **Secure Token Storage**: Android Keystore integration for credentials
+
+### 📁 Folder Synchronization
+- **Multiple Sync Pairs**: Configure up to 10 independent folder synchronizations
+- **Local Folder Picker**: Browse and select device folders with intuitive navigation
+- **Cloud Folder Browser**: Navigate Google Drive and OneDrive folders
+- **Five Sync Modes**:
+  - 🔼 Upload Only
+  - 🔼🗑️ Upload then Delete
+  - 🔽 Download Only
+  - 🔽🗑️ Download then Delete
+  - 🔄 Two-Way Sync
+- **Delete Delay Configuration**: Set delays from 0-30 days for automatic deletion
+
+### 📱 User Interface
+- **Material Design 3**: Modern, beautiful UI components
+- **Dark Mode Support**: Follows system theme preferences
+- **Responsive Layouts**: Optimized for different screen sizes
+- **Intuitive Navigation**: Easy-to-use interface for all features
+- **Real-Time Updates**: Live sync status and progress tracking
+
+### ⚙️ Configuration Management
+- **CRUD Operations**: Create, view, update, and delete sync configurations
+- **Enable/Disable Toggles**: Control active configurations without deletion
+- **Configuration Counter**: Visual indicator of used slots (X/10)
+- **Persistent Storage**: Configurations saved locally using SharedPreferences
+
+## 📦 Requirements
+
+### Development Environment
+- ✅ **Android Studio** Arctic Fox (2020.3.1) or later
+  - [Download Android Studio](https://developer.android.com/studio)
+- ✅ **JDK** 8 or higher (JDK 11 recommended)
+- ✅ **Gradle** 8.0+ (managed by Android Studio)
+- ✅ **Android SDK** with the following components:
+  - SDK Platform 24+ (Android 7.0+)
+  - Build Tools 30.0.3+
+  - SDK Tools
+
+### Target Devices
+- 📱 **Minimum SDK**: API 24 (Android 7.0 Nougat)
+- 📱 **Target SDK**: API 33 (Android 13)
+- 📱 **Test Coverage**: Android 7.0 through Android 14
+
+### Backend Requirements
+- 🖥️ Running backend server (see [backend/README.md](../backend/README.md))
+- 🌐 Network connectivity between device and backend
 
 ## Setup Instructions
 
@@ -94,55 +147,157 @@ In Azure Portal, go to your app → API permissions:
 3. Select your device/emulator
 4. Wait for the app to build and install
 
-## App Structure
+## 🏗️ App Structure
 
 ```
-app/
-├── src/main/
-│   ├── java/com/cloudsync/app/
-│   │   ├── MainActivity.java              # Main screen
-│   │   ├── AccountSelectionActivity.java  # Google account selection
-│   │   ├── AccountAdapter.java            # RecyclerView adapter for accounts
-│   │   └── OneDriveAuthActivity.java      # OneDrive authentication
-│   ├── res/
-│   │   ├── layout/                        # UI layouts
-│   │   │   ├── activity_main.xml
-│   │   │   ├── activity_account_selection.xml
-│   │   │   ├── activity_onedrive_auth.xml
-│   │   │   └── item_account.xml
-│   │   ├── values/                        # Resources
-│   │   │   ├── strings.xml
-│   │   │   ├── colors.xml
-│   │   │   └── themes.xml
-│   │   └── raw/
-│   │       └── auth_config_msal.json     # MSAL configuration
-│   └── AndroidManifest.xml
-├── build.gradle                           # App-level build config
-└── proguard-rules.pro                     # ProGuard rules
+CloudSyncApp/
+├── app/                                   # Application module
+│   ├── src/main/
+│   │   ├── java/com/cloudsync/app/       # Java source code
+│   │   │   ├── MainActivity.java                      # Main activity
+│   │   │   ├── AccountSelectionActivity.java          # Google account picker
+│   │   │   ├── OneDriveAuthActivity.java              # OneDrive authentication
+│   │   │   ├── SyncConfigListActivity.java            # List all configurations
+│   │   │   ├── FolderSyncConfigActivity.java          # Create/edit config
+│   │   │   ├── LocalFolderPickerActivity.java         # Local folder browser
+│   │   │   ├── CloudFolderPickerActivity.java         # Cloud folder browser
+│   │   │   ├── adapters/                              # RecyclerView adapters
+│   │   │   │   ├── AccountAdapter.java
+│   │   │   │   ├── SyncConfigAdapter.java
+│   │   │   │   ├── FolderAdapter.java
+│   │   │   │   └── CloudFolderAdapter.java
+│   │   │   ├── models/                                # Data models
+│   │   │   │   ├── SyncConfig.java
+│   │   │   │   └── CloudFolder.java
+│   │   │   ├── utils/                                 # Utility classes
+│   │   │   │   └── SyncConfigManager.java             # Config persistence
+│   │   │   └── api/                                   # API interfaces
+│   │   │       └── ApiService.java                    # Retrofit service
+│   │   ├── res/                          # Resources
+│   │   │   ├── layout/                   # XML layouts
+│   │   │   │   ├── activity_main.xml
+│   │   │   │   ├── activity_sync_config_list.xml
+│   │   │   │   ├── activity_folder_sync_config.xml
+│   │   │   │   ├── activity_local_folder_picker.xml
+│   │   │   │   ├── activity_cloud_folder_picker.xml
+│   │   │   │   └── item_*.xml            # List item layouts
+│   │   │   ├── values/                   # Value resources
+│   │   │   │   ├── strings.xml           # String resources
+│   │   │   │   ├── colors.xml            # Color definitions
+│   │   │   │   └── themes.xml            # Material themes
+│   │   │   ├── drawable/                 # Drawable resources
+│   │   │   └── raw/                      # Raw resources
+│   │   │       └── auth_config_msal.json # MSAL configuration
+│   │   └── AndroidManifest.xml           # App manifest
+│   ├── build.gradle                      # App build configuration
+│   └── proguard-rules.pro                # ProGuard/R8 rules
+├── gradle/                                # Gradle wrapper
+└── build.gradle                          # Project build configuration
 ```
 
-## Usage
+### Key Components
 
-### Selecting a Google Account
+#### Activities
+- **MainActivity**: Entry point, account selection, and main navigation
+- **SyncConfigListActivity**: Displays all sync configurations with management options
+- **FolderSyncConfigActivity**: Form to create/edit sync configurations
+- **LocalFolderPickerActivity**: Browse device folders with navigation
+- **CloudFolderPickerActivity**: Browse Google Drive/OneDrive folders
 
+#### Adapters
+- **SyncConfigAdapter**: RecyclerView adapter for sync configuration list
+- **FolderAdapter**: Adapter for local folder browsing
+- **CloudFolderAdapter**: Adapter for cloud folder browsing
+
+#### Utilities
+- **SyncConfigManager**: Handles configuration persistence using SharedPreferences
+  - Save/load configurations
+  - Enforce 10-config limit
+  - Generate unique IDs
+
+## 📖 Usage Guide
+
+### First-Time Setup
+
+#### 1. Select Cloud Provider Account
+
+**For Google Drive:**
 1. Launch the app
-2. Tap "Select Google Account"
-3. Choose from the list of Google accounts already logged in on your device
-4. The selected account will be displayed on the main screen
+2. Tap **"Select Google Account"**
+3. Choose from device accounts
+4. Account will be displayed on main screen
 
-### Adding OneDrive Account
+**For OneDrive:**
+1. Tap **"Add OneDrive Account"**
+2. Tap **"Sign In"**
+3. Complete Microsoft authentication
+4. Grant requested permissions
+5. Account connected successfully
 
-1. From the main screen, tap "Add OneDrive Account"
-2. Tap "Sign In"
-3. Complete the Microsoft authentication flow
-4. Grant the requested permissions
-5. Your OneDrive account will be connected
+#### 2. Create Your First Sync Configuration
 
-### Syncing Data
+1. From main screen, tap **"Manage Folder Sync"**
+2. Tap the **"+"** (FAB) button
+3. **Select Local Folder:**
+   - Tap "Browse Local Folder"
+   - Navigate to desired folder
+   - Tap folder to enter it
+   - Use ".." to go up one level
+   - Tap "Select This Folder" when ready
+4. **Select Cloud Provider:**
+   - Choose "Google Drive" or "OneDrive" from dropdown
+5. **Select Cloud Folder:**
+   - Tap "Browse Cloud Folder"
+   - Navigate through cloud folders
+   - Tap "Select This Folder" when ready
+6. **Configure Sync Mode:**
+   - Choose from 5 modes:
+     - Upload Only
+     - Upload then Delete
+     - Download Only
+     - Download then Delete
+     - Two-Way Sync
+7. **Set Delete Delay** (if applicable):
+   - Adjust slider from 0-30 days
+   - Only visible for modes with deletion
+8. Tap **"Save Configuration"**
 
-1. Make sure you have either a Google account or OneDrive account connected
-2. Tap "Sync Data" button
-3. The app will sync your data to the selected cloud storage
+#### 3. Execute Sync
+
+1. Return to main screen
+2. Tap **"Execute Sync"** button
+3. View progress and results
+4. Check sync status in configuration list
+
+### Managing Configurations
+
+#### View All Configurations
+- Tap "Manage Folder Sync"
+- See all configurations (X/10 counter at top)
+- Each card shows:
+  - Local and cloud folder paths
+  - Provider icon (Google/OneDrive)
+  - Sync mode
+  - Enable/disable status
+  - Last sync time
+
+#### Enable/Disable Configuration
+- Tap the toggle switch on configuration card
+- Green = Enabled, Gray = Disabled
+- Disabled configs won't sync
+
+#### Delete Configuration
+1. Long press on configuration card, or
+2. Tap configuration → Select "Delete" from menu
+3. Confirm deletion
+4. Counter updates (e.g., 4/10 → 3/10)
+
+#### Configuration Limit
+- Maximum 10 configurations allowed
+- When limit reached:
+  - FAB button shows warning
+  - Must delete existing config to add new one
+  - Counter shows "10/10"
 
 ## Permissions
 

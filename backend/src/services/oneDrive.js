@@ -170,6 +170,164 @@ class OneDriveService {
       throw new Error(`Failed to search files: ${error.response?.data?.error?.message || error.message}`);
     }
   }
+
+  /**
+   * Create or get folder by path
+   */
+  async getOrCreateFolder(folderPath) {
+    try {
+      // Sanitize folder path to prevent ReDoS
+      let folderName = folderPath;
+      while (folderName.startsWith('/')) {
+        folderName = folderName.substring(1);
+      }
+      while (folderName.endsWith('/')) {
+        folderName = folderName.substring(0, folderName.length - 1);
+      }
+
+      // Validate folder name to prevent path traversal
+      if (!folderName || folderName.includes('..') || folderName.includes('\\')) {
+        throw new Error('Invalid folder path');
+      }
+      
+      // Try to get existing folder
+      try {
+        const url = `${this.baseUrl}/me/drive/root:/${encodeURIComponent(folderName)}`;
+        const response = await axios.get(url, {
+          headers: this.headers
+        });
+
+        if (response.data.folder) {
+          return {
+            success: true,
+            folder: {
+              id: response.data.id,
+              name: response.data.name
+            }
+          };
+        }
+      } catch (err) {
+        // Folder doesn't exist, create it
+      }
+
+      // Create folder
+      const url = `${this.baseUrl}/me/drive/root/children`;
+      const response = await axios.post(url, {
+        name: folderName,
+        folder: {},
+        '@microsoft.graph.conflictBehavior': 'rename'
+      }, {
+        headers: this.headers
+      });
+
+      return {
+        success: true,
+        folder: {
+          id: response.data.id,
+          name: response.data.name
+        }
+      };
+    } catch (error) {
+      console.error('Error creating/getting folder in OneDrive:', error.response?.data || error.message);
+      throw new Error(`Failed to create/get folder: ${error.response?.data?.error?.message || error.message}`);
+    }
+  }
+
+  /**
+   * Upload file to a specific folder
+   */
+  async uploadFileToFolder(folderId, filename, content) {
+    try {
+      // Validate filename to prevent path traversal
+      if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+        throw new Error('Invalid filename');
+      }
+
+      const url = `${this.baseUrl}/me/drive/items/${folderId}:/${encodeURIComponent(filename)}:/content`;
+      
+      const response = await axios.put(url, content, {
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      return {
+        success: true,
+        file: {
+          id: response.data.id,
+          name: response.data.name,
+          size: response.data.size,
+          createdDateTime: response.data.createdDateTime,
+          lastModifiedDateTime: response.data.lastModifiedDateTime,
+          webUrl: response.data.webUrl
+        }
+      };
+    } catch (error) {
+      console.error('Error uploading file to folder in OneDrive:', error.response?.data || error.message);
+      throw new Error(`Failed to upload file to folder: ${error.response?.data?.error?.message || error.message}`);
+    }
+  }
+
+  /**
+   * List files in a specific folder
+   */
+  async listFilesInFolder(folderId) {
+    try {
+      const url = `${this.baseUrl}/me/drive/items/${folderId}/children`;
+      
+      const response = await axios.get(url, {
+        headers: this.headers
+      });
+
+      const files = response.data.value.map(file => ({
+        id: file.id,
+        name: file.name,
+        size: file.size,
+        createdDateTime: file.createdDateTime,
+        lastModifiedDateTime: file.lastModifiedDateTime,
+        webUrl: file.webUrl,
+        mimeType: file.file?.mimeType || 'folder'
+      }));
+
+      return {
+        success: true,
+        files: files
+      };
+    } catch (error) {
+      console.error('Error listing files in folder from OneDrive:', error.response?.data || error.message);
+      throw new Error(`Failed to list files in folder: ${error.response?.data?.error?.message || error.message}`);
+    }
+  }
+
+  /**
+   * Get file metadata
+   */
+  async getFileMetadata(fileId) {
+    try {
+      const url = `${this.baseUrl}/me/drive/items/${fileId}`;
+      
+      const response = await axios.get(url, {
+        headers: this.headers
+      });
+
+      return {
+        success: true,
+        file: {
+          id: response.data.id,
+          name: response.data.name,
+          size: response.data.size,
+          createdDateTime: response.data.createdDateTime,
+          lastModifiedDateTime: response.data.lastModifiedDateTime,
+          webUrl: response.data.webUrl,
+          mimeType: response.data.file?.mimeType || 'folder'
+        }
+      };
+    } catch (error) {
+      console.error('Error getting file metadata from OneDrive:', error.response?.data || error.message);
+      throw new Error(`Failed to get file metadata: ${error.response?.data?.error?.message || error.message}`);
+    }
+  }
 }
 
 module.exports = OneDriveService;

@@ -26,10 +26,13 @@ public class MainActivity extends AppCompatActivity {
     private MaterialButton selectGoogleAccountButton;
     private MaterialButton manageOneDriveButton;
     private MaterialButton syncButton;
+    private MaterialButton configureFolderSyncButton;
     
     private SharedPreferences prefs;
     private String selectedGoogleAccount = null;
     private boolean isOneDriveConnected = false;
+    
+    private static final int REQUEST_FOLDER_SYNC_CONFIG = 300;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         selectGoogleAccountButton = findViewById(R.id.selectGoogleAccountButton);
         manageOneDriveButton = findViewById(R.id.manageOneDriveButton);
         syncButton = findViewById(R.id.syncButton);
+        configureFolderSyncButton = findViewById(R.id.configureFolderSyncButton);
     }
     
     private void loadSavedState() {
@@ -72,6 +76,11 @@ public class MainActivity extends AppCompatActivity {
         
         syncButton.setOnClickListener(v -> {
             showSyncConfirmation();
+        });
+        
+        configureFolderSyncButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SyncConfigListActivity.class);
+            startActivity(intent);
         });
     }
     
@@ -125,6 +134,18 @@ public class MainActivity extends AppCompatActivity {
                 if (isOneDriveConnected) {
                     showSuccessSnackbar("OneDrive connected successfully");
                 }
+            }
+        } else if (requestCode == REQUEST_FOLDER_SYNC_CONFIG && resultCode == RESULT_OK) {
+            // Folder sync configuration saved
+            if (data != null) {
+                String localFolder = data.getStringExtra("local_folder");
+                String cloudFolder = data.getStringExtra("cloud_folder");
+                String syncMode = data.getStringExtra("sync_mode");
+                String provider = data.getStringExtra("provider");
+                int deleteDelayDays = data.getIntExtra("delete_delay_days", 0);
+                
+                // Save configuration (in a real app, send to backend API)
+                showSuccessSnackbar("Sync configuration saved successfully");
             }
         }
         

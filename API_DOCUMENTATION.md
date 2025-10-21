@@ -1,36 +1,152 @@
-# API Documentation
+# 📡 Cloud Sync API Documentation
+
+Complete REST API reference for the Cloud Sync Application backend server.
+
+## 📋 Table of Contents
+
+- [Overview](#overview)
+- [Base URL](#base-url)
+- [Authentication](#authentication)
+- [Authentication Endpoints](#authentication-endpoints)
+- [Sync Endpoints](#sync-endpoints)
+- [Sync Configuration Endpoints](#sync-configuration-endpoints)
+- [Error Handling](#error-responses)
+- [Code Examples](#mobile-app-integration-example)
+- [OAuth Setup](#setup-instructions-for-oauth)
+
+## Overview
+
+The Cloud Sync API provides a RESTful interface for mobile applications to:
+- Authenticate users via Google and Microsoft OAuth 2.0
+- Upload and download files to cloud storage (Google Drive, OneDrive)
+- Manage folder synchronization configurations
+- Browse cloud storage folders
+
+### API Characteristics
+- **Protocol**: HTTP/HTTPS
+- **Format**: JSON
+- **Authentication**: Session-based with OAuth 2.0
+- **CORS**: Enabled for mobile app integration
 
 ## Base URL
+
+**Development:**
 ```
 http://localhost:3000
 ```
 
+**Production:**
+```
+https://your-domain.com
+```
+
+### Endpoint Structure
+```
+[BASE_URL]/[route]/[resource]
+```
+
+**Examples:**
+- `http://localhost:3000/auth/status`
+- `http://localhost:3000/api/sync/list`
+- `http://localhost:3000/api/sync-config`
+
+## Authentication
+
+### Session-Based Authentication
+
+The API uses **session-based authentication** with secure cookies:
+
+1. User initiates OAuth flow (`/auth/google` or `/auth/microsoft`)
+2. After successful authentication, server creates a session
+3. Session cookie (`connect.sid`) is set in response
+4. Subsequent requests must include this cookie
+
+### Including Session Cookie
+
+**JavaScript/Fetch:**
+```javascript
+fetch('http://localhost:3000/api/sync/list', {
+  credentials: 'include'  // Important!
+})
+```
+
+**cURL:**
+```bash
+curl http://localhost:3000/api/sync/list \
+  --cookie "connect.sid=your_session_cookie"
+```
+
+### Authentication Flow
+
+```
+Mobile App → /auth/google → Google Login → Callback → Session Created
+          ↓
+     Session Cookie Stored
+          ↓
+     Future API Requests (with cookie)
+```
+
+---
+
 ## Authentication Endpoints
 
 ### 1. Initiate Google OAuth
-**Endpoint:** `GET /auth/google`
 
-**Description:** Redirects user to Google OAuth consent screen.
+```http
+GET /auth/google
+```
 
-**Response:** Redirects to Google OAuth page
+**Description:** Initiates Google OAuth 2.0 flow. Redirects user to Google consent screen.
+
+**Authentication Required:** No
+
+**Parameters:** None
+
+**Response:** HTTP 302 Redirect to Google OAuth page
+
+**Usage:**
+```javascript
+// Open in browser or WebView
+window.location.href = 'http://localhost:3000/auth/google';
+```
 
 ---
 
 ### 2. Google OAuth Callback
-**Endpoint:** `GET /auth/google/callback`
 
-**Description:** Callback URL for Google OAuth. Called automatically by Google after user grants permission.
+```http
+GET /auth/google/callback
+```
 
-**Response:**
+**Description:** OAuth callback endpoint. Called automatically by Google after user authorization.
+
+**Authentication Required:** No
+
+**Query Parameters:**
+- `code` (auto): Authorization code from Google
+- `state` (auto): State parameter for CSRF protection
+
+**Success Response (200 OK):**
 ```json
 {
   "success": true,
   "message": "Successfully authenticated with Google",
   "user": {
-    "id": "user_id",
+    "id": "12345678901234567890",
     "provider": "google",
     "displayName": "John Doe",
-    "email": "john@example.com"
+    "email": "john.doe@example.com",
+    "picture": "https://lh3.googleusercontent.com/..."
+  }
+}
+```
+
+**Error Response (401 Unauthorized):**
+```json
+{
+  "error": {
+    "message": "Authentication failed",
+    "status": 401
   }
 }
 ```
@@ -38,29 +154,60 @@ http://localhost:3000
 ---
 
 ### 3. Initiate Microsoft OAuth
-**Endpoint:** `GET /auth/microsoft`
 
-**Description:** Redirects user to Microsoft OAuth consent screen.
+```http
+GET /auth/microsoft
+```
 
-**Response:** Redirects to Microsoft OAuth page
+**Description:** Initiates Microsoft OAuth 2.0 flow. Redirects user to Microsoft login page.
+
+**Authentication Required:** No
+
+**Parameters:** None
+
+**Response:** HTTP 302 Redirect to Microsoft OAuth page
+
+**Usage:**
+```javascript
+window.location.href = 'http://localhost:3000/auth/microsoft';
+```
 
 ---
 
 ### 4. Microsoft OAuth Callback
-**Endpoint:** `GET /auth/microsoft/callback`
 
-**Description:** Callback URL for Microsoft OAuth. Called automatically by Microsoft after user grants permission.
+```http
+GET /auth/microsoft/callback
+```
 
-**Response:**
+**Description:** OAuth callback endpoint. Called automatically by Microsoft after user authorization.
+
+**Authentication Required:** No
+
+**Query Parameters:**
+- `code` (auto): Authorization code from Microsoft
+- `state` (auto): State parameter for CSRF protection
+
+**Success Response (200 OK):**
 ```json
 {
   "success": true,
   "message": "Successfully authenticated with Microsoft",
   "user": {
-    "id": "user_id",
+    "id": "12345678-1234-1234-1234-123456789012",
     "provider": "microsoft",
     "displayName": "Jane Doe",
-    "email": "jane@example.com"
+    "email": "jane.doe@outlook.com"
+  }
+}
+```
+
+**Error Response (401 Unauthorized):**
+```json
+{
+  "error": {
+    "message": "Authentication failed",
+    "status": 401
   }
 }
 ```
@@ -68,38 +215,68 @@ http://localhost:3000
 ---
 
 ### 5. Check Authentication Status
-**Endpoint:** `GET /auth/status`
 
-**Description:** Check if user is currently authenticated.
+```http
+GET /auth/status
+```
 
-**Response (Authenticated):**
+**Description:** Checks if the current session is authenticated and returns user information.
+
+**Authentication Required:** No
+
+**Parameters:** None
+
+**Success Response - Authenticated (200 OK):**
 ```json
 {
   "authenticated": true,
   "user": {
-    "id": "user_id",
+    "id": "12345678901234567890",
     "provider": "google",
     "displayName": "John Doe",
-    "email": "john@example.com"
+    "email": "john.doe@example.com"
   }
 }
 ```
 
-**Response (Not Authenticated):**
+**Success Response - Not Authenticated (200 OK):**
 ```json
 {
   "authenticated": false
 }
 ```
 
+**Example Usage:**
+```javascript
+const checkAuth = async () => {
+  const response = await fetch('http://localhost:3000/auth/status', {
+    credentials: 'include'
+  });
+  const data = await response.json();
+  
+  if (data.authenticated) {
+    console.log('User:', data.user.displayName);
+  } else {
+    console.log('Not authenticated');
+  }
+};
+```
+
 ---
 
 ### 6. Logout
-**Endpoint:** `GET /auth/logout`
 
-**Description:** Logout current user and clear session.
+```http
+GET /auth/logout
+```
 
-**Response:**
+**Description:** Logs out the current user and destroys the session.
+
+**Authentication Required:** Yes
+
+**Parameters:** None
+
+**Success Response (200 OK):**
 ```json
 {
   "success": true,
@@ -107,16 +284,35 @@ http://localhost:3000
 }
 ```
 
+**Example Usage:**
+```javascript
+const logout = async () => {
+  const response = await fetch('http://localhost:3000/auth/logout', {
+    credentials: 'include'
+  });
+  const data = await response.json();
+  console.log(data.message);
+  // Redirect to login page
+};
+```
+
+---
+
 ---
 
 ## Sync Endpoints
 
 ### 1. Upload File
-**Endpoint:** `POST /api/sync/upload`
 
-**Description:** Upload a file to the authenticated user's cloud storage (Google Drive or OneDrive).
+```http
+POST /api/sync/upload
+```
 
-**Authentication Required:** Yes
+**Description:** Uploads a file to the authenticated user's cloud storage (Google Drive or OneDrive).
+
+**Authentication Required:** ✅ Yes
+
+**Content-Type:** `application/json`
 
 **Request Body:**
 ```json
@@ -126,21 +322,69 @@ http://localhost:3000
 }
 ```
 
-**Response:**
+**Request Body Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `filename` | string | Yes | Name of the file to upload |
+| `content` | string | Yes | File content (can be text or JSON string) |
+
+**Success Response (200 OK):**
 ```json
 {
   "success": true,
   "message": "File uploaded successfully",
   "provider": "google",
   "file": {
-    "id": "file_id",
+    "id": "1a2b3c4d5e6f7g8h9i0j",
     "name": "app_data.json",
     "mimeType": "application/json",
-    "createdTime": "2023-10-06T12:00:00Z",
-    "modifiedTime": "2023-10-06T12:00:00Z",
+    "createdTime": "2024-01-15T12:34:56Z",
+    "modifiedTime": "2024-01-15T12:34:56Z",
     "size": "1024"
   }
 }
+```
+
+**Error Responses:**
+
+**401 Unauthorized:**
+```json
+{
+  "error": {
+    "message": "Not authenticated",
+    "status": 401
+  }
+}
+```
+
+**400 Bad Request:**
+```json
+{
+  "error": {
+    "message": "Filename and content are required",
+    "status": 400
+  }
+}
+```
+
+**Example Usage:**
+```javascript
+const uploadFile = async (filename, content) => {
+  const response = await fetch('http://localhost:3000/api/sync/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({ filename, content })
+  });
+  
+  const result = await response.json();
+  if (result.success) {
+    console.log('File uploaded:', result.file.id);
+  }
+  return result;
+};
 ```
 
 ---

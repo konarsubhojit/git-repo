@@ -78,6 +78,7 @@ See [frontend/README.md](frontend/README.md) for detailed Android app documentat
 ## Documentation
 
 - **[API Documentation](API_DOCUMENTATION.md)**: Complete API reference
+- **[CI/CD Documentation](CI_CD_DOCUMENTATION.md)**: Continuous integration and artifact creation pipelines
 - **[Multiple Folder Bindings](MULTIPLE_FOLDER_BINDINGS.md)**: Feature documentation for multi-folder sync
 - **[Folder Selection Guide](FOLDER_SELECTION_GUIDE.md)**: Step-by-step user guide
 - **[Architecture Diagram](ARCHITECTURE_DIAGRAM.md)**: System architecture and data flows

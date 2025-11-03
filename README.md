@@ -224,12 +224,14 @@ const files = await fetch('http://localhost:3000/api/sync/list', {
 - ✅ **Environment Variables**: Never commit secrets to version control
 - ✅ **CORS Configuration**: Properly configured cross-origin policies
 
-### Best Practices
-- 🔐 Use separate OAuth credentials for development and production
-- 🔐 Rotate credentials regularly
-- 🔐 Grant minimal required permissions
-- 🔐 Review and audit access logs
-- 🔐 Keep dependencies updated
+- **[API Documentation](API_DOCUMENTATION.md)**: Complete API reference
+- **[CI/CD Documentation](CI_CD_DOCUMENTATION.md)**: Continuous integration and artifact creation pipelines
+- **[Multiple Folder Bindings](MULTIPLE_FOLDER_BINDINGS.md)**: Feature documentation for multi-folder sync
+- **[Folder Selection Guide](FOLDER_SELECTION_GUIDE.md)**: Step-by-step user guide
+- **[Architecture Diagram](ARCHITECTURE_DIAGRAM.md)**: System architecture and data flows
+- **[Folder Sync Feature](FOLDER_SYNC_FEATURE.md)**: Original folder sync documentation
+- **[Quick Start Guide](QUICKSTART.md)**: Get started quickly
+- **[Contributing](CONTRIBUTING.md)**: Contribution guidelines
 
 ### Important Notes
 ⚠️ **Never commit `.env` files or API keys to version control**  

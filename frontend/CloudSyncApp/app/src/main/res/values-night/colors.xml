@@ -16,6 +16,7 @@
     <color name="text_secondary">#B0B0B0</color>
     <color name="divider">#424242</color>
     <color name="background">#121212</color>
+    <color name="surface">#1E1E1E</color>
     
     <!-- Google Colors -->
     <color name="google_blue">#4285F4</color>

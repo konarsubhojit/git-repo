@@ -152,8 +152,9 @@ This prevents unnecessary workflow runs and saves CI/CD minutes.
 
 ### Backend
 - Security vulnerability scanning with `npm audit`
-- Audit level set to `moderate`
-- Continues on error to not fail builds on low-severity issues
+- Audit level set to `high` (only fails on critical and high severity issues)
+- Continues on error to not fail builds, but alerts will be visible in logs
+- Node.js engine requirement: >=18.0.0 (currently supported LTS versions)
 
 ### Android
 - Uses official Temurin JDK distribution

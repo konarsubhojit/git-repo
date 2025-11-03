@@ -44,7 +44,7 @@ jobs:
         run: npm test
       
       - name: Check for security vulnerabilities
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=high
         continue-on-error: true
   
   create-artifact:

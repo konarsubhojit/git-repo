@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 yarn.lock
 
 # Environment variables
@@ -112,3 +111,20 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+
+# Android build artifacts
+*.apk
+*.aab
+*.ap_
+*.dex
+.gradle
+build/
+captures/
+local.properties
+*.iml
+.externalNativeBuild
+.cxx
+
+# CI/CD artifacts
+artifact/
+release-artifacts/

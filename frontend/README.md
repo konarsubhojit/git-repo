@@ -430,6 +430,26 @@ Build → Rebuild Project
 3. Install Build Tools 30.0.3+
 4. Sync Gradle files
 
+---
+
+**❌ Build error: Could not find com.microsoft.device.display:display-mask**
+
+**Solution:**
+This is a known issue with MSAL 4.9.0. The Microsoft Maven repository is already configured in `settings.gradle`:
+```gradle
+repositories {
+    google()
+    mavenCentral()
+    maven {
+        url 'https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1'
+    }
+}
+```
+If you still encounter this issue:
+1. Sync Gradle files (File → Sync Project with Gradle Files)
+2. Clean project (Build → Clean Project)
+3. Rebuild project (Build → Rebuild Project)
+
 ### Authentication Issues
 
 **❌ Google account selection not working**

@@ -14,7 +14,7 @@ This repository uses GitHub Actions for Continuous Integration (CI) and artifact
 **Jobs:**
 
 #### Build and Test
-- **Matrix Testing:** Runs on Node.js versions 14.x, 16.x, 18.x, and 20.x
+- **Matrix Testing:** Runs on Node.js versions 18.x and 20.x (currently supported LTS versions)
 - **Steps:**
   - Checkout code
   - Setup Node.js with npm caching

@@ -152,13 +152,19 @@ This prevents unnecessary workflow runs and saves CI/CD minutes.
 
 ### Backend
 - Security vulnerability scanning with `npm audit`
-- Audit level set to `high` (only fails on critical and high severity issues)
-- Continues on error to not fail builds, but alerts will be visible in logs
+- Audit level set to `high` (only alerts on critical and high severity issues)
+- **Note:** Currently uses `continue-on-error: true` to not fail builds, allowing visibility of issues without blocking CI
+- **Recommendation:** For production deployments, add a separate required security check step or remove `continue-on-error`
 - Node.js engine requirement: >=18.0.0 (currently supported LTS versions)
 
 ### Android
 - Uses official Temurin JDK distribution
 - Gradle wrapper validation can be added for additional security
+- **Note:** Release APKs are currently unsigned (for testing purposes)
+- **Recommendation:** Configure signing with keystore and credentials for production releases
+  - Store signing keys in GitHub Secrets
+  - Add signing configuration to build.gradle
+  - Sign APKs/AABs in the workflow
 
 ## Troubleshooting
 
